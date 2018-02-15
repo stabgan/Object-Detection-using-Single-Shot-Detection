@@ -1,6 +1,6 @@
 # Object Detection
 
-![output video](https://youtu.be/OrhB3qGQhZI)
+[output video](https://youtu.be/OrhB3qGQhZI)
 
 ### The paper about SSD: Single Shot MultiBox Detector (by C. Szegedy et al.) was released at the end of November 2016 and reached new records in terms of performance and precision for object detection tasks, scoring over 74% mAP (mean Average Precision) at 59 frames per second on standard datasets such as PascalVOC and COCO. The name of this architecture comes from:
 
