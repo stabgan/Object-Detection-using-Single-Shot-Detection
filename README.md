@@ -26,4 +26,4 @@ After running the man-and-dog.mp4 file i got the output.mp4 :
 
 Output :
 
-![down](https://media.giphy.com/media/bTzlRRdfnUTZjg76dc/giphy.gif)
+![](https://media.giphy.com/media/bTzlRRdfnUTZjg76dc/giphy.gif)
