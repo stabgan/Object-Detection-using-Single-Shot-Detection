@@ -22,8 +22,10 @@ The bounding box regression technique of SSD is inspired by Szegedy’s work on 
 
 # Now the fun part ! RESULTS THAT I OBTAINED ARE NOT 100% ACCURATE BUT IT's GOOD :
 
-After running the man-and-dog.mp4 file i got the output.mp4 :
+After running the man-and-dog.mp4 file i got  :
 
 Output :
 
-![](https://media.giphy.com/media/bTzlRRdfnUTZjg76dc/giphy.gif)
+![](https://image.ibb.co/b1ZCwS/frame_050_delay_0_1s.gif)
+![](https://image.ibb.co/dJraGS/image.png)
+![](https://image.ibb.co/jR8pbS/frame_069_delay_0_1s.gif)
