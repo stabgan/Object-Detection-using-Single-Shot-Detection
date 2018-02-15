@@ -1,5 +1,3 @@
-# Homework Solution
-
 # Importing the libraries
 import torch
 from torch.autograd import Variable
@@ -35,7 +33,7 @@ net.load_state_dict(torch.load('ssd300_mAP_77.43_v2.pth', map_location = lambda 
 transform = BaseTransform(net.size, (104/256.0, 117/256.0, 123/256.0))
 
 # Doing some Object Detection on a video
-reader = imageio.get_reader(' man-and-dog.mp4')
+reader = imageio.get_reader(' man-and-dog.mp4') #change the name of the video file , which you want to train
 fps = reader.get_meta_data()['fps']
 writer = imageio.get_writer('output.mp4', fps = fps)
 for i, frame in enumerate(reader):
