@@ -7,9 +7,9 @@ from ssd import build_ssd
 import imageio
 
 # Defining a function that will do the detections
-def detect(frame, net, transform):
+def detect(frame, net, transform): # frame is the object frame , net is the net from ssd.py and transform is the transformed dimensions
     height, width = frame.shape[:2]
-    frame_t = transform(frame)[0]
+    frame_t = transform(frame)[0] # transforming the frame
     x = torch.from_numpy(frame_t).permute(2, 0, 1)
     x = Variable(x.unsqueeze(0))
     y = net(x)
