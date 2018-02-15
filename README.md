@@ -18,7 +18,7 @@ The bounding box regression technique of SSD is inspired by Szegedy’s work on 
 
 ![](https://cdn-images-1.medium.com/max/1600/1*WbNf0ngkmCJYT_jXX6IaOw.png)
 
-# Thanks to [Max de Groot](https://github.com/amdegroot/ssd.pytorch)
+# Thanks to [Max de Groot](https://github.com/amdegroot/ssd.pytorch) for the ssd.py
 
 # Now the fun part ! RESULTS THAT I OBTAINED ARE NOT 100% ACCURATE BUT IT's GOOD :
 
@@ -26,4 +26,4 @@ After running the man-and-dog.mp4 file i got the output.mp4 :
 
 Output :
 
-![](https://image.ibb.co/dM9WO7/Webp_net_resizeimage.gif)
+![down](https://media.giphy.com/media/bTzlRRdfnUTZjg76dc/giphy.gif)
