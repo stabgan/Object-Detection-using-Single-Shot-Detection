@@ -1,33 +1,156 @@
-# Object Detection
+# 🎯 Object Detection using Single Shot Detection (SSD)
 
-[output video](https://youtu.be/OrhB3qGQhZI)
+Real-time object detection on video using the **SSD300** (Single Shot MultiBox Detector) architecture with a VGG-16 backbone. The model detects and classifies 20 object categories from the PASCAL VOC dataset in a single forward pass — no region proposal step needed.
 
-### The paper about SSD: Single Shot MultiBox Detector (by C. Szegedy et al.) was released at the end of November 2016 and reached new records in terms of performance and precision for object detection tasks, scoring over 74% mAP (mean Average Precision) at 59 frames per second on standard datasets such as PascalVOC and COCO. The name of this architecture comes from:
+> 📄 Based on the paper: [SSD: Single Shot MultiBox Detector](https://arxiv.org/abs/1512.02325) by Wei Liu, Dragomir Anguelov, Dumitru Erhan, Christian Szegedy, Scott Reed, Cheng-Yang Fu, Alexander C. Berg (2016)
 
-- Single Shot: this means that the tasks of object localization and classification are done in a single forward pass of the network
-- MultiBox: this is the name of a technique for bounding box regression developed by Szegedy et al. (we will briefly cover it shortly)
-- Detector: The network is an object detector that also classifies those detected objects
+---
 
-# Architecture :
-![](https://cdn-images-1.medium.com/max/1600/1*51joMGlhxvftTxGtA4lA7Q.png)
+## 🏗️ Architecture
 
-SSD’s architecture builds on the venerable VGG-16 architecture, but discards the fully connected layers. The reason VGG-16 was used as the base network is because of its strong performance in high quality image classification tasks and its popularity for problems where transfer learning helps in improving results. Instead of the original VGG fully connected layers, a set of auxiliary convolutional layers (from conv6 onwards) were added, thus enabling to extract features at multiple scales and progressively decrease the size of the input to each subsequent layer.
+```
+Input Image (300×300)
+       │
+   ┌───▼───┐
+   │ VGG-16 │  (pretrained base network, FC layers removed)
+   │ conv1  │──► conv4_3 ──► L2Norm ──► predictions (4 boxes/cell)
+   │  ...   │
+   │ conv5  │──► fc7 (as conv) ──────► predictions (6 boxes/cell)
+   └───┬───┘
+       │
+   ┌───▼────────┐
+   │ Extra Convs │  (auxiliary feature extraction layers)
+   │ conv8_2     │──► predictions (6 boxes/cell)
+   │ conv9_2     │──► predictions (6 boxes/cell)
+   │ conv10_2    │──► predictions (4 boxes/cell)
+   │ conv11_2    │──► predictions (4 boxes/cell)
+   └─────────────┘
+       │
+   ┌───▼───┐
+   │  NMS  │  Non-Maximum Suppression
+   └───┬───┘
+       │
+   Final Detections (class + bounding box + confidence)
+```
 
-![](https://cdn-images-1.medium.com/max/1600/1*3-TqqkRQ4rWLOMX-gvkYwA.png)
+Multi-scale feature maps (38×38, 19×19, 10×10, 5×5, 3×3, 1×1) allow the network to detect objects at different sizes. Each feature map cell predicts offsets for a set of default (prior) boxes and per-class confidence scores.
 
-#### Multibox :
-The bounding box regression technique of SSD is inspired by Szegedy’s work on MultiBox, a method for fast class-agnostic bounding box coordinate proposals. Interestingly, in the work done on MultiBox an Inception-style convolutional network is used. The 1x1 convolutions that you see below help in dimensionality reduction since the number of dimensions will go down (but “width” and “height” will remain the same).
+---
 
-![](https://cdn-images-1.medium.com/max/1600/1*WbNf0ngkmCJYT_jXX6IaOw.png)
+## 🛠️ Tech Stack
 
-# Thanks to [Max de Groot](https://github.com/amdegroot/ssd.pytorch) for the ssd.py
+| Component | Technology |
+|-----------|-----------|
+| 🧠 Deep Learning | PyTorch |
+| 👁️ Computer Vision | OpenCV |
+| 🎬 Video I/O | imageio |
+| 📊 Data Format | PASCAL VOC (XML annotations) |
+| 🏛️ Base Network | VGG-16 (pretrained on ImageNet) |
 
-# Now the fun part ! RESULTS THAT I OBTAINED ARE NOT 100% ACCURATE BUT IT's GOOD :
+---
 
-After running the man-and-dog.mp4 file i got  :
+## 📦 Dependencies
 
-Output :
+```
+torch >= 1.0
+torchvision
+opencv-python
+imageio
+imageio-ffmpeg
+numpy
+Pillow
+```
 
-![](https://image.ibb.co/b1ZCwS/frame_050_delay_0_1s.gif)
-![](https://image.ibb.co/dJraGS/image.png)
-![](https://image.ibb.co/jR8pbS/frame_069_delay_0_1s.gif)
+Install all dependencies:
+
+```bash
+pip install torch torchvision opencv-python imageio imageio-ffmpeg numpy Pillow
+```
+
+---
+
+## 🚀 How to Run
+
+### 1. Download pretrained weights
+
+Download `ssd300_mAP_77.43_v2.pth` from the [original SSD PyTorch repo](https://github.com/amdegroot/ssd.pytorch) and place it in the `object_detection with SSD/` directory.
+
+### 2. Run object detection on a video
+
+```bash
+cd "object_detection with SSD"
+python object_detection.py
+```
+
+This will:
+- Load the SSD300 model with pretrained VOC weights
+- Process `man-and-dog.mp4` frame by frame
+- Draw bounding boxes and class labels on detected objects
+- Write the result to `output.mp4`
+
+To use a different video, edit the filename in `object_detection.py`:
+```python
+reader = imageio.get_reader('your-video.mp4')
+```
+
+### 3. (Optional) Train on PASCAL VOC
+
+Download the VOC dataset using the provided scripts:
+```bash
+cd "object_detection with SSD /data/scripts"
+bash VOC2007.sh
+bash VOC2012.sh
+```
+
+---
+
+## 📁 Project Structure
+
+```
+├── object_detection with SSD/
+│   ├── ssd.py                  # SSD network definition + build_ssd()
+│   ├── object_detection.py     # Video inference pipeline
+│   ├── man-and-dog.mp4         # Sample input video
+│   └── output.mp4              # Generated output
+│
+├── object_detection with SSD /
+│   ├── data/
+│   │   ├── __init__.py         # BaseTransform + data utilities
+│   │   ├── config.py           # SSD300 v1/v2 hyperparameters
+│   │   └── voc0712.py          # VOC dataset loader
+│   └── layers/
+│       ├── box_utils.py        # NMS, IoU, encode/decode utilities
+│       ├── functions/
+│       │   ├── detection.py    # Post-processing (decode + NMS)
+│       │   └── prior_box.py    # Default/prior box generation
+│       └── modules/
+│           ├── l2norm.py       # L2 normalization layer
+│           └── multibox_loss.py # SSD training loss (loc + conf)
+│
+├── LICENSE
+└── README.md
+```
+
+---
+
+## ⚠️ Known Issues
+
+- Only **SSD300** is implemented; SSD512 config stubs exist but are empty
+- The pretrained weights file (`ssd300_mAP_77.43_v2.pth`) is not included in the repo — must be downloaded separately
+- Detection confidence threshold is hardcoded at `0.6` in `object_detection.py`
+- No GPU/CUDA inference path in the video detection script (runs on CPU by default)
+- The repo contains two similarly-named directories (`object_detection with SSD` and `object_detection with SSD ` with a trailing space) — this is a legacy structure from the original repo
+
+---
+
+## 🙏 Credits
+
+- SSD PyTorch implementation by [Max de Groot (amdegroot)](https://github.com/amdegroot/ssd.pytorch)
+- Original paper by Wei Liu et al. — [arXiv:1512.02325](https://arxiv.org/abs/1512.02325)
+- VGG-16 architecture by Karen Simonyan & Andrew Zisserman
+
+---
+
+## 📄 License
+
+See [LICENSE](LICENSE) for details.
