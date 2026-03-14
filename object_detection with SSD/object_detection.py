@@ -1,26 +1,18 @@
 # Importing the libraries
 import torch
+from torch.autograd import Variable
 import cv2
 from data import BaseTransform, VOC_CLASSES as labelmap
 from ssd import build_ssd
 import imageio
 
-
 # Defining a function that will do the detections
-def detect(frame, net, transform):
-    """Perform object detection on a single frame.
-
-    Args:
-        frame: the input video frame (numpy array)
-        net: the SSD network
-        transform: the image transformation pipeline
-    """
+def detect(frame, net, transform): # frame is the object frame , net is the net from ssd.py and transform is the transformed dimensions
     height, width = frame.shape[:2]
-    frame_t = transform(frame)[0]
+    frame_t = transform(frame)[0] # transforming the frame
     x = torch.from_numpy(frame_t).permute(2, 0, 1)
-    x = x.unsqueeze(0)
-    with torch.no_grad():
-        y = net(x)
+    x = Variable(x.unsqueeze(0))
+    y = net(x)
     detections = y.data
     scale = torch.Tensor([width, height, width, height])
     # detections = [batch, number of classes, number of occurence, (score, x0, Y0, x1, y1)]
@@ -33,20 +25,17 @@ def detect(frame, net, transform):
             j += 1
     return frame
 
-
 # Creating the SSD neural network
 net = build_ssd('test')
-net.load_state_dict(torch.load('ssd300_mAP_77.43_v2.pth',
-                               map_location=lambda storage, loc: storage,
-                               weights_only=True))
+net.load_state_dict(torch.load('ssd300_mAP_77.43_v2.pth', map_location = lambda storage, loc: storage))
 
 # Creating the transformation
 transform = BaseTransform(net.size, (104/256.0, 117/256.0, 123/256.0))
 
 # Doing some Object Detection on a video
-reader = imageio.get_reader('man-and-dog.mp4')  # change the name of the video file
+reader = imageio.get_reader(' man-and-dog.mp4') #change the name of the video file , which you want to train
 fps = reader.get_meta_data()['fps']
-writer = imageio.get_writer('output.mp4', fps=fps)
+writer = imageio.get_writer('output.mp4', fps = fps)
 for i, frame in enumerate(reader):
     frame = detect(frame, net.eval(), transform)
     writer.append_data(frame)
