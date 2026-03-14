@@ -1,33 +1,87 @@
-# Object Detection
+# Object Detection using Single Shot Detection (SSD)
 
-[output video](https://youtu.be/OrhB3qGQhZI)
+Real-time object detection on video using the SSD300 architecture with a VGG-16 backbone, pretrained on Pascal VOC.
 
-### The paper about SSD: Single Shot MultiBox Detector (by C. Szegedy et al.) was released at the end of November 2016 and reached new records in terms of performance and precision for object detection tasks, scoring over 74% mAP (mean Average Precision) at 59 frames per second on standard datasets such as PascalVOC and COCO. The name of this architecture comes from:
+## What It Does
 
-- Single Shot: this means that the tasks of object localization and classification are done in a single forward pass of the network
-- MultiBox: this is the name of a technique for bounding box regression developed by Szegedy et al. (we will briefly cover it shortly)
-- Detector: The network is an object detector that also classifies those detected objects
+Processes a video file frame-by-frame through an SSD300 network, detects objects from 20 Pascal VOC classes, draws bounding boxes with class labels, and writes the annotated result to a new video file.
 
-# Architecture :
-![](https://cdn-images-1.medium.com/max/1600/1*51joMGlhxvftTxGtA4lA7Q.png)
+## Architecture
 
-SSD’s architecture builds on the venerable VGG-16 architecture, but discards the fully connected layers. The reason VGG-16 was used as the base network is because of its strong performance in high quality image classification tasks and its popularity for problems where transfer learning helps in improving results. Instead of the original VGG fully connected layers, a set of auxiliary convolutional layers (from conv6 onwards) were added, thus enabling to extract features at multiple scales and progressively decrease the size of the input to each subsequent layer.
+SSD (Single Shot MultiBox Detector) performs object localization and classification in a single forward pass:
 
-![](https://cdn-images-1.medium.com/max/1600/1*3-TqqkRQ4rWLOMX-gvkYwA.png)
+- **Base network**: VGG-16 (truncated before fully connected layers)
+- **Feature extraction**: Multi-scale feature maps from auxiliary convolutional layers (conv6 onwards)
+- **Detection heads**: Separate conv layers for bounding box regression and class confidence at each scale
+- **Post-processing**: Non-maximum suppression (NMS) to filter overlapping detections
 
-#### Multibox :
-The bounding box regression technique of SSD is inspired by Szegedy’s work on MultiBox, a method for fast class-agnostic bounding box coordinate proposals. Interestingly, in the work done on MultiBox an Inception-style convolutional network is used. The 1x1 convolutions that you see below help in dimensionality reduction since the number of dimensions will go down (but “width” and “height” will remain the same).
+The model scores **74%+ mAP** at 59 FPS on Pascal VOC.
 
-![](https://cdn-images-1.medium.com/max/1600/1*WbNf0ngkmCJYT_jXX6IaOw.png)
+> Paper: [SSD: Single Shot MultiBox Detector](https://arxiv.org/abs/1512.02325) (Liu et al., 2016)
 
-# Thanks to [Max de Groot](https://github.com/amdegroot/ssd.pytorch) for the ssd.py
+## 🛠 Tech Stack
 
-# Now the fun part ! RESULTS THAT I OBTAINED ARE NOT 100% ACCURATE BUT IT's GOOD :
+| Component | Technology |
+|-----------|-----------|
+| 🧠 Model | SSD300 (VGG-16 backbone) |
+| 🔥 Framework | PyTorch |
+| 📹 Video I/O | imageio, OpenCV |
+| 📦 Dataset | Pascal VOC 2007/2012 (20 classes) |
 
-After running the man-and-dog.mp4 file i got  :
+## Setup
 
-Output :
+```bash
+# Install dependencies
+pip install torch torchvision opencv-python imageio imageio-ffmpeg numpy
 
-![](https://image.ibb.co/b1ZCwS/frame_050_delay_0_1s.gif)
-![](https://image.ibb.co/dJraGS/image.png)
-![](https://image.ibb.co/jR8pbS/frame_069_delay_0_1s.gif)
+# Download pretrained weights (~100 MB)
+# Place ssd300_mAP_77.43_v2.pth in the project directory
+```
+
+## Usage
+
+```bash
+cd "object_detection with SSD"
+python object_detection.py
+```
+
+Edit `object_detection.py` to change the input video file path. By default it processes `man-and-dog.mp4`.
+
+## Project Structure
+
+```
+object_detection with SSD/     # Main scripts
+├── object_detection.py        # Video inference pipeline
+├── ssd.py                     # SSD model definition
+├── man-and-dog.mp4            # Sample input video
+└── epic_horses.mp4            # Additional sample video
+
+object_detection with SSD /    # Supporting modules
+├── data/                      # Dataset classes and config
+│   ├── config.py              # SSD300/512 hyperparameters
+│   └── voc0712.py             # VOC dataset loader
+└── layers/                    # Network components
+    ├── box_utils.py           # Bounding box utilities (NMS, IoU, encode/decode)
+    ├── functions/
+    │   ├── detection.py       # Post-processing detection layer
+    │   └── prior_box.py       # Default anchor box generation
+    └── modules/
+        ├── l2norm.py          # L2 normalization layer
+        └── multibox_loss.py   # SSD training loss (smooth L1 + cross entropy)
+```
+
+## Sample Output
+
+![Detection example](https://image.ibb.co/dJraGS/image.png)
+
+[Full output video on YouTube](https://youtu.be/OrhB3qGQhZI)
+
+## ⚠️ Known Issues
+
+- The pretrained weights file (`ssd300_mAP_77.43_v2.pth`) is not included in the repo — must be downloaded separately
+- Two directories with near-identical names exist due to a trailing space; both are required for imports to resolve correctly
+- Only SSD300 is implemented; SSD512 config entries are empty placeholders
+
+## Credits
+
+SSD PyTorch implementation based on [amdegroot/ssd.pytorch](https://github.com/amdegroot/ssd.pytorch) by Max de Groot.

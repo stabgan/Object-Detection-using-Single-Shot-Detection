@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.autograd import Variable
 from layers import *
 from data import v2
 import os
@@ -28,9 +27,9 @@ class SSD(nn.Module):
         super(SSD, self).__init__()
         self.phase = phase
         self.num_classes = num_classes
-        # TODO: implement __call__ in PriorBox
         self.priorbox = PriorBox(v2)
-        self.priors = Variable(self.priorbox.forward(), volatile=True)
+        with torch.no_grad():
+            self.priors = self.priorbox.forward()
         self.size = 300
 
         # SSD network
@@ -43,19 +42,19 @@ class SSD(nn.Module):
         self.conf = nn.ModuleList(head[1])
 
         if phase == 'test':
-            self.softmax = nn.Softmax()
+            self.softmax = nn.Softmax(dim=-1)
             self.detect = Detect(num_classes, 0, 200, 0.01, 0.45)
 
     def forward(self, x):
         """Applies network layers and ops on input image(s) x.
 
         Args:
-            x: input image or batch of images. Shape: [batch,3*batch,300,300].
+            x: input image or batch of images. Shape: [batch,3,300,300].
 
         Return:
             Depending on phase:
             test:
-                Variable(tensor) of output class label predictions,
+                tensor of output class label predictions,
                 confidence score, and corresponding location predictions for
                 each object detected. Shape: [batch,topk,7]
 
@@ -110,9 +109,12 @@ class SSD(nn.Module):
 
     def load_weights(self, base_file):
         other, ext = os.path.splitext(base_file)
-        if ext == '.pkl' or '.pth':
+        if ext in ('.pkl', '.pth'):
             print('Loading weights into state dict...')
-            self.load_state_dict(torch.load(base_file, map_location=lambda storage, loc: storage))
+            self.load_state_dict(
+                torch.load(base_file, map_location=lambda storage, loc: storage,
+                           weights_only=True)
+            )
             print('Finished!')
         else:
             print('Sorry only .pth and .pkl files supported.')

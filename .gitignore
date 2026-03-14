@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pth
+*.pkl
+output.mp4

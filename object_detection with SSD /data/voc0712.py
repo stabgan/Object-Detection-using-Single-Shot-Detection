@@ -8,17 +8,11 @@ Updated by: Ellis Brown, Max deGroot
 
 import os
 import os.path
-import sys
 import torch
 import torch.utils.data as data
-import torchvision.transforms as transforms
-from PIL import Image, ImageDraw, ImageFont
 import cv2
 import numpy as np
-if sys.version_info[0] == 2:
-    import xml.etree.cElementTree as ET
-else:
-    import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET
 
 VOC_CLASSES = (  # always index 0
     'aeroplane', 'bicycle', 'bird', 'boat',
@@ -110,8 +104,9 @@ class VOCDetection(data.Dataset):
         self.ids = list()
         for (year, name) in image_sets:
             rootpath = os.path.join(self.root, 'VOC' + year)
-            for line in open(os.path.join(rootpath, 'ImageSets', 'Main', name + '.txt')):
-                self.ids.append((rootpath, line.strip()))
+            with open(os.path.join(rootpath, 'ImageSets', 'Main', name + '.txt')) as f:
+                for line in f:
+                    self.ids.append((rootpath, line.strip()))
 
     def __getitem__(self, index):
         im, gt, h, w = self.pull_item(index)
